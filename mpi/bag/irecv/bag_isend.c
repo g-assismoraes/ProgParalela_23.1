@@ -18,6 +18,8 @@ int cont = 0, total = 0;
 int i, n;
 int meu_ranque, num_procs, inicio, dest, raiz=0, tag=1, stop=0;
 MPI_Status estado;
+MPI_Request pedido_envia;
+MPI_Request pedido_recebe;
 /* Verifica o número de argumentos passados */
 	if (argc < 2) {
         printf("Entre com o valor do maior inteiro como parâmetro para o programa.\n");
@@ -40,11 +42,14 @@ MPI_Status estado;
     if (meu_ranque == 0) { 
         for (dest=1, inicio=3; dest < num_procs && inicio < n; dest++, inicio += TAMANHO) {
             printf("envio for 1: %d\n", dest);
-            MPI_Send(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD);
+            MPI_Isend(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD, &pedido_envia);
+            MPI_Wait(&pedido_envia, &estado);
         }
 /* Fica recebendo as contagens parciais de cada processo */
         while ((stop < (num_procs - 1)) && (stop < (n/TAMANHO + 1))) {
-		    MPI_Recv(&cont, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &estado);
+		    MPI_Irecv(&cont, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &pedido_recebe);
+            MPI_Wait(&pedido_recebe, &estado);
+            //MPI_Irecv(&cont, 1, MPI_INT, origem, etiq, MPI_COMM_WORLD, &pedido_recebe); ->> veio do outro arquivo
 
             total += cont;
             dest = estado.MPI_SOURCE;
@@ -53,7 +58,9 @@ MPI_Status estado;
                 tag = 99;
                 stop++;
             }
-            MPI_Send(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD); /* Envia um nvo pedaço com TAMANHO números para o mesmo processo*/
+            MPI_Isend(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD, &pedido_envia); /* Envia um nvo pedaço com TAMANHO números para o mesmo processo*/
+            MPI_Wait(&pedido_envia, &estado);
+            //MPI_Isend(&cont, 1, MPI_INT, destino, etiq, MPI_COMM_WORLD, &pedido_envia); -> veio do outro
             inicio += TAMANHO;
 
         }
@@ -61,7 +68,9 @@ MPI_Status estado;
     else { 
 /* Cada processo escravo recebe o início do espaço de busca */
         while ((estado.MPI_TAG != 99) && (meu_ranque <= (n/TAMANHO + 1))) {
-            MPI_Recv(&inicio, 1, MPI_INT, raiz, MPI_ANY_TAG, MPI_COMM_WORLD, &estado);
+            MPI_Irecv(&inicio, 1, MPI_INT, raiz, MPI_ANY_TAG, MPI_COMM_WORLD, &pedido_recebe);
+            MPI_Wait(&pedido_recebe, &estado);
+            //MPI_Irecv(&cont, 1, MPI_INT, origem, etiq, MPI_COMM_WORLD, &pedido_recebe); ->> veio do outro arquivo
             printf("%d recebeu - tag %d\n", meu_ranque, estado.MPI_TAG);
             if (estado.MPI_TAG != 99) {
                 for (i = inicio, cont=0; i < (inicio + TAMANHO) && i < n; i+=2) 
@@ -69,7 +78,8 @@ MPI_Status estado;
                         cont++;
 /* Envia a contagem parcial para o processo mestre */
                 printf("%d enviou no while 2\n", meu_ranque);
-                MPI_Send(&cont, 1, MPI_INT, raiz, tag, MPI_COMM_WORLD);
+                MPI_Isend(&cont, 1, MPI_INT, raiz, tag, MPI_COMM_WORLD, &pedido_envia);
+                MPI_Wait(&pedido_envia, &estado);
             } 
             else{
                 printf("acabou\n");

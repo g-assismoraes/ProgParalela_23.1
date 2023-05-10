@@ -40,7 +40,7 @@ MPI_Status estado;
     if (meu_ranque == 0) { 
         for (dest=1, inicio=3; dest < num_procs && inicio < n; dest++, inicio += TAMANHO) {
             printf("envio for 1: %d\n", dest);
-            MPI_Send(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD);
+            MPI_Rsend(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD);
         }
 /* Fica recebendo as contagens parciais de cada processo */
         while ((stop < (num_procs - 1)) && (stop < (n/TAMANHO + 1))) {
@@ -53,7 +53,7 @@ MPI_Status estado;
                 tag = 99;
                 stop++;
             }
-            MPI_Send(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD); /* Envia um nvo pedaço com TAMANHO números para o mesmo processo*/
+            MPI_Rsend(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD); /* Envia um nvo pedaço com TAMANHO números para o mesmo processo*/
             inicio += TAMANHO;
 
         }
