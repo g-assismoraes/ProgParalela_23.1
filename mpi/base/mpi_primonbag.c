@@ -76,10 +76,6 @@ MPI_Status estado;
             }
         }
         printf("ACABOU 2\n");
-        // if (estado.MPI_TAG == 99){
-        //     MPI_Send(&cont, 0, MPI_INT, raiz, tag, MPI_COMM_WORLD);
-        //     printf("arroz");
-        // }
 
 /* Registra o tempo final de execução */
     t_final = MPI_Wtime();

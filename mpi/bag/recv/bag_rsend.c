@@ -69,17 +69,13 @@ MPI_Status estado;
                         cont++;
 /* Envia a contagem parcial para o processo mestre */
                 printf("%d enviou no while 2\n", meu_ranque);
-                MPI_Send(&cont, 1, MPI_INT, raiz, tag, MPI_COMM_WORLD);
+                MPI_Rsend(&cont, 1, MPI_INT, raiz, tag, MPI_COMM_WORLD);
             } 
             else{
                 printf("acabou\n");
             }
         }
         printf("ACABOU 2\n");
-        // if (estado.MPI_TAG == 99){
-        //     MPI_Send(&cont, 0, MPI_INT, raiz, tag, MPI_COMM_WORLD);
-        //     printf("arroz");
-        // }
 
 /* Registra o tempo final de execução */
     t_final = MPI_Wtime();

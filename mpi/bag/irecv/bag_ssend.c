@@ -42,8 +42,7 @@ MPI_Request pedido_recebe;
     if (meu_ranque == 0) { 
         for (dest=1, inicio=3; dest < num_procs && inicio < n; dest++, inicio += TAMANHO) {
             printf("envio for 1: %d\n", dest);
-            MPI_Isend(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD, &pedido_envia);
-            MPI_Wait(&pedido_envia, &estado);
+            MPI_Ssend(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD);
         }
 /* Fica recebendo as contagens parciais de cada processo */
         while ((stop < (num_procs - 1)) && (stop < (n/TAMANHO + 1))) {
@@ -58,8 +57,7 @@ MPI_Request pedido_recebe;
                 tag = 99;
                 stop++;
             }
-            MPI_Isend(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD, &pedido_envia); /* Envia um nvo pedaço com TAMANHO números para o mesmo processo*/
-            MPI_Wait(&pedido_envia, &estado);
+             MPI_Ssend(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD); /* Envia um nvo pedaço com TAMANHO números para o mesmo processo*/
             //MPI_Isend(&cont, 1, MPI_INT, destino, etiq, MPI_COMM_WORLD, &pedido_envia); -> veio do outro
             inicio += TAMANHO;
 
@@ -78,8 +76,7 @@ MPI_Request pedido_recebe;
                         cont++;
 /* Envia a contagem parcial para o processo mestre */
                 printf("%d enviou no while 2\n", meu_ranque);
-                MPI_Isend(&cont, 1, MPI_INT, raiz, tag, MPI_COMM_WORLD, &pedido_envia);
-                MPI_Wait(&pedido_envia, &estado);
+                MPI_Ssend(&cont, 1, MPI_INT, raiz, tag, MPI_COMM_WORLD);
             } 
             else{
                 printf("acabou\n");
